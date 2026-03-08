@@ -1,0 +1,768 @@
+{
+  "info": {
+    "name": "Dormitory Management API",
+    "description": "API Collection cho hệ thống quản lý ký túc xá - Building, Room, RoomAssignment",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "buildingId", "value": "" },
+    { "key": "roomId", "value": "" },
+    { "key": "studentId", "value": "" },
+    { "key": "assignmentId", "value": "" },
+    { "key": "managerId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "🏢 Building",
+      "item": [
+        {
+          "name": "1. CRUD",
+          "item": [
+            {
+              "name": "Create Building",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var json = pm.response.json();",
+                      "    pm.collectionVariables.set('buildingId', json._id);",
+                      "    console.log('Saved buildingId:', json._id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Tòa A\",\n  \"address\": \"123 Nguyễn Trãi, Quận 5, TP.HCM\",\n  \"totalFloors\": 5,\n  \"description\": \"Tòa nhà ký túc xá A dành cho sinh viên nam\",\n  \"managerId\": \"{{managerId}}\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/buildings",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings"]
+                }
+              }
+            },
+            {
+              "name": "Get All Buildings",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings"]
+                }
+              }
+            },
+            {
+              "name": "Get Building By Id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/{{buildingId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "{{buildingId}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Building",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address\": \"789 Trần Hưng Đạo, Quận 1, TP.HCM\",\n  \"totalFloors\": 7,\n  \"description\": \"Đã nâng cấp thêm 2 tầng\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/{{buildingId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "{{buildingId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Building (Soft Delete)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/{{buildingId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "{{buildingId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Quản lý trạng thái",
+          "item": [
+            {
+              "name": "Update Status → maintenance",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"maintenance\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/{{buildingId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "{{buildingId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "Update Status → active",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"active\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/{{buildingId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "{{buildingId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "Update Status → inactive",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"inactive\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/{{buildingId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "{{buildingId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "Update Status → invalid (expect 400)",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"invalid_status\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/{{buildingId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "{{buildingId}}", "status"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Tìm kiếm / Lọc",
+          "item": [
+            {
+              "name": "Get Buildings By Status",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/status/active",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "status", "active"]
+                }
+              }
+            },
+            {
+              "name": "Search by Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/search?name=Tòa",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "search"],
+                  "query": [{ "key": "name", "value": "Tòa" }]
+                }
+              }
+            },
+            {
+              "name": "Search by Address",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/search?address=Nguyễn",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "search"],
+                  "query": [{ "key": "address", "value": "Nguyễn" }]
+                }
+              }
+            },
+            {
+              "name": "Search by Name + Address",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/search?name=Tòa&address=Quận",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "search"],
+                  "query": [
+                    { "key": "name", "value": "Tòa" },
+                    { "key": "address", "value": "Quận" }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Buildings By Manager",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/manager/{{managerId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "manager", "{{managerId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Thống kê",
+          "item": [
+            {
+              "name": "Get Building Stats (single)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/stats/{{buildingId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "stats", "{{buildingId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get All Buildings Stats",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/buildings/stats",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["buildings", "stats"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🚪 Room",
+      "item": [
+        {
+          "name": "1. CRUD",
+          "item": [
+            {
+              "name": "Create Room",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var json = pm.response.json();",
+                      "    pm.collectionVariables.set('roomId', json._id);",
+                      "    console.log('Saved roomId:', json._id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"buildingId\": \"{{buildingId}}\",\n  \"roomNumber\": \"A101\",\n  \"floor\": 1,\n  \"type\": \"standard\",\n  \"maxOccupancy\": 4,\n  \"pricePerTerm\": 2000000,\n  \"amenities\": [\"Quạt trần\", \"Tủ cá nhân\", \"Bàn học\"],\n  \"description\": \"Phòng 4 người tiêu chuẩn tầng 1\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/rooms",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms"]
+                }
+              }
+            },
+            {
+              "name": "Get All Rooms",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms"]
+                }
+              }
+            },
+            {
+              "name": "Get Room By Id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/{{roomId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "{{roomId}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Room",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"pricePerTerm\": 2500000,\n  \"amenities\": [\"Quạt trần\", \"Tủ cá nhân\", \"Bàn học\", \"Máy lạnh\"],\n  \"description\": \"Phòng đã nâng cấp thêm máy lạnh\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/{{roomId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "{{roomId}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Room (Soft Delete)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/{{roomId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "{{roomId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Quản lý trạng thái",
+          "item": [
+            {
+              "name": "Update Room Status → maintenance",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"maintenance\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/{{roomId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "Update Room Status → available",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"available\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/{{roomId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "status"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Quản lý số người",
+          "item": [
+            {
+              "name": "Add Occupant",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/{{roomId}}/add-occupant",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "add-occupant"]
+                }
+              }
+            },
+            {
+              "name": "Remove Occupant",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/{{roomId}}/remove-occupant",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "{{roomId}}", "remove-occupant"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Tìm kiếm / Lọc",
+          "item": [
+            {
+              "name": "Get Rooms By Building",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/building/{{buildingId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "building", "{{buildingId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Rooms By Status",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/status/available",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "status", "available"]
+                }
+              }
+            },
+            {
+              "name": "Get Rooms By Type",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/type/standard",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "type", "standard"]
+                }
+              }
+            },
+            {
+              "name": "Search Rooms (roomNumber)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/search?roomNumber=A101",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "search"],
+                  "query": [{ "key": "roomNumber", "value": "A101" }]
+                }
+              }
+            },
+            {
+              "name": "Search Rooms (floor + price)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/search?floor=1&minPrice=1000000&maxPrice=3000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "search"],
+                  "query": [
+                    { "key": "floor", "value": "1" },
+                    { "key": "minPrice", "value": "1000000" },
+                    { "key": "maxPrice", "value": "3000000" }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Thống kê",
+          "item": [
+            {
+              "name": "Get Available Rooms",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/available",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "available"]
+                }
+              }
+            },
+            {
+              "name": "Get Full Rooms",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/rooms/full",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["rooms", "full"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Room Assignment",
+      "item": [
+        {
+          "name": "1. CRUD Xếp phòng",
+          "item": [
+            {
+              "name": "Create Assignment",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "if (pm.response.code === 201) {",
+                      "    var json = pm.response.json();",
+                      "    pm.collectionVariables.set('assignmentId', json._id);",
+                      "    console.log('Saved assignmentId:', json._id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"studentId\": \"{{studentId}}\",\n  \"roomId\": \"{{roomId}}\",\n  \"buildingId\": \"{{buildingId}}\",\n  \"termCode\": \"2025-2026-HK1\",\n  \"startDate\": \"2025-09-01\",\n  \"note\": \"Xếp phòng đầu năm học\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments"]
+                }
+              }
+            },
+            {
+              "name": "Get All Assignments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments"]
+                }
+              }
+            },
+            {
+              "name": "Get Assignment By Id",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/{{assignmentId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "{{assignmentId}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Assignment",
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Cập nhật ghi chú mới\",\n  \"termCode\": \"2025-2026-HK2\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/{{assignmentId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "{{assignmentId}}"]
+                }
+              }
+            },
+            {
+              "name": "Cancel Assignment",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Hủy do sinh viên chuyển trường\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/{{assignmentId}}/cancel",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "{{assignmentId}}", "cancel"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Kết thúc lưu trú",
+          "item": [
+            {
+              "name": "End Assignment",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"endDate\": \"2026-01-15\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/{{assignmentId}}/end",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "{{assignmentId}}", "end"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Tìm kiếm / Lọc",
+          "item": [
+            {
+              "name": "Get Assignments By Student",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/student/{{studentId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "student", "{{studentId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Assignments By Room",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/room/{{roomId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "room", "{{roomId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Assignments By Building",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/building/{{buildingId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "building", "{{buildingId}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Assignments By Term",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/term/2025-2026-HK1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "term", "2025-2026-HK1"]
+                }
+              }
+            },
+            {
+              "name": "Get Assignments By Status (active)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/status/active",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "status", "active"]
+                }
+              }
+            },
+            {
+              "name": "Get Assignments By Status (ended)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/status/ended",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "status", "ended"]
+                }
+              }
+            },
+            {
+              "name": "Get Assignments By Status (cancelled)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/status/cancelled",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "status", "cancelled"]
+                }
+              }
+            },
+            {
+              "name": "Get Active Assignments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/room-assignments/active",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["room-assignments", "active"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
