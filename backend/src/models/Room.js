@@ -1,5 +1,6 @@
-const mongoose = require("mongoose");
-
+const mongoose = require("mongoose"); 
+// Mô hình dữ liệu cho phòng trọ
+// Mỗi phòng trọ sẽ thuộc về một tòa nhà và có các thông tin như số phòng, tầng, loại phòng, số lượng người tối đa, giá tiền, trạng thái, tiện nghi, mô tả và trạng thái hoạt động.
 const roomSchema = new mongoose.Schema(
     {
         buildingId: {
@@ -15,7 +16,7 @@ const roomSchema = new mongoose.Schema(
         floor: {
             type: Number,
             required: true,
-            min: [1, "Tầng phải ít nhất là 1"],
+            min: 1,
         },
         type: {
             type: String,
@@ -25,18 +26,18 @@ const roomSchema = new mongoose.Schema(
         maxOccupancy: {
             type: Number,
             required: true,
-            min: [1, "Sức chứa tối thiểu là 1"],
+            min: 1,
             default: 4,
         },
         currentOccupancy: {
             type: Number,
             default: 0,
-            min: [0, "Số người ở hiện tại không thể âm"],
+            min: 0,
         },
         pricePerTerm: {
             type: Number,
             required: true,
-            min: [0, "Giá thuê không thể âm"],
+            min: 0,
         },
         status: {
             type: String,
@@ -60,8 +61,6 @@ const roomSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-        toJSON: { virtuals: true },
-        toObject: { virtuals: true },
     }
 );
 
