@@ -1,5 +1,6 @@
 const mongoose = require("mongoose"); 
-///mtien
+// Mô hình dữ liệu cho phòng ký túc xá
+// Loại phòng: tiêu chuẩn, VIP, cao cấp
 const roomSchema = new mongoose.Schema(
     {
         buildingId: {
