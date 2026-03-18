@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+// Mô hình dữ liệu cho phân công phòng của sinh viên
+// Mỗi phân công sẽ liên kết một sinh viên với một phòng trong một kỳ học cụ thể, cùng với thông tin về ngày bắt đầu, ngày kết thúc, trạng thái và ghi chú (nếu có).
 
 const roomAssignmentSchema = new mongoose.Schema(
     {
