@@ -1,12 +1,10 @@
 const Building = require("../models/Building");
 const Room = require("../models/Room");
-require("../models/User"); // Đảm bảo model User được đăng ký cho populate
+require("../models/User"); 
 
 // ========================
-// 1. CRUD Tòa nhà
+// 1. CRUD tòa nhà
 // ========================
-
-// Thêm tòa nhà mới
 const createBuilding = async (req, res) => {
   try {
     const { name, address, totalFloors, description, managerId } = req.body;
