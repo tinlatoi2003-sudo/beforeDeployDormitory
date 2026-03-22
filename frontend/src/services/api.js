@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 const baseURL = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
 
@@ -16,7 +16,8 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (res) => res,
     (error) => {
-        if (error.response?.status === 401) {
+        const isLoginRequest = error.config?.url?.includes("/auth/login");
+        if (error.response?.status === 401 && !isLoginRequest) {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             window.location.href = "/login";

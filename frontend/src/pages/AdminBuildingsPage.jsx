@@ -9,7 +9,7 @@ const TYPE_LABEL = { standard: "Tiêu chuẩn", vip: "VIP", premium: "Premium" }
 const occColor = (pct) => pct < 50 ? "#16a34a" : pct < 100 ? "#f59e0b" : "#dc2626";
 
 /* ─── BuildingCard ─────────────────────────── */
-function BuildingCard({ building, onEdit, onDelete, onAddRoom, onDeleteRoom, showAlert }) {
+function BuildingCard({ building, onEdit, onDelete, onAddRoom, onDeleteRoom, onEditRoom, showAlert }) {
     const [open, setOpen] = useState(false);
     const [rooms, setRooms] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -117,6 +117,9 @@ function BuildingCard({ building, onEdit, onDelete, onAddRoom, onDeleteRoom, sho
                                         </div>
                                         <div className="ab-room-price">{fmtNum(room.pricePerTerm)}đ/kỳ</div>
                                         <div className="ab-room-actions">
+                                            <button className="ab-btn-room-edit" onClick={() => onEditRoom(room, refreshRooms)}>
+                                                ✏️ Sửa
+                                            </button>
                                             <button className="ab-btn-room-del" onClick={() => handleDeleteRoom(room)}>
                                                 🗑️ Xóa
                                             </button>
@@ -195,6 +198,90 @@ function BuildingModal({ building, onClose, onSuccess }) {
                     <button className="ab-btn-cancel" onClick={onClose}>Hủy</button>
                     <button className="ab-btn-confirm" onClick={handleSubmit} disabled={loading}>
                         {loading ? "Đang lưu..." : isEdit ? "Cập nhật" : "Tạo tòa nhà"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ─── Modal: Sửa phòng ────────────────────── */
+function EditRoomModal({ room, onClose, onSuccess }) {
+    const [form, setForm] = useState({
+        roomNumber: room.roomNumber || "",
+        floor: room.floor || "",
+        type: room.type || "standard",
+        maxOccupancy: room.maxOccupancy || "4",
+        pricePerTerm: room.pricePerTerm || "",
+        status: room.status || "available",
+        description: room.description || "",
+    });
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState("");
+
+    const handleChange = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+
+    const handleSubmit = async () => {
+        if (!form.roomNumber || !form.floor || !form.pricePerTerm) {
+            setErr("Vui lòng nhập đầy đủ: số phòng, tầng, giá/kỳ"); return;
+        }
+        setLoading(true); setErr("");
+        try {
+            await api.put(`/rooms/${room._id}`, form);
+            onSuccess();
+        } catch (e) {
+            setErr(e.response?.data?.message || "Cập nhật phòng thất bại");
+        }
+        setLoading(false);
+    };
+
+    return (
+        <div className="ab-overlay" onClick={onClose}>
+            <div className="ab-modal" onClick={e => e.stopPropagation()}>
+                <div className="ab-modal-title">✏️ Sửa phòng {room.roomNumber}</div>
+                <div className="ab-modal-grid">
+                    <div className="ab-field">
+                        <label className="ab-label">Số phòng *</label>
+                        <input className="ab-input" name="roomNumber" placeholder="VD: 101" value={form.roomNumber} onChange={handleChange} />
+                    </div>
+                    <div className="ab-field">
+                        <label className="ab-label">Tầng *</label>
+                        <input className="ab-input" name="floor" type="number" min="1" placeholder="VD: 1" value={form.floor} onChange={handleChange} />
+                    </div>
+                    <div className="ab-field">
+                        <label className="ab-label">Loại phòng</label>
+                        <select className="ab-select" name="type" value={form.type} onChange={handleChange}>
+                            <option value="standard">Tiêu chuẩn</option>
+                            <option value="vip">VIP</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                    <div className="ab-field">
+                        <label className="ab-label">Sức chứa tối đa</label>
+                        <input className="ab-input" name="maxOccupancy" type="number" min="1" value={form.maxOccupancy} onChange={handleChange} />
+                    </div>
+                    <div className="ab-field">
+                        <label className="ab-label">Giá / kỳ (đồng) *</label>
+                        <input className="ab-input" name="pricePerTerm" type="number" min="0" placeholder="VD: 1500000" value={form.pricePerTerm} onChange={handleChange} />
+                    </div>
+                    <div className="ab-field">
+                        <label className="ab-label">Trạng thái</label>
+                        <select className="ab-select" name="status" value={form.status} onChange={handleChange}>
+                            <option value="available">Còn chỗ</option>
+                            <option value="maintenance">Bảo trì</option>
+                            <option value="full">Hết chỗ</option>
+                        </select>
+                    </div>
+                    <div className="ab-field full">
+                        <label className="ab-label">Mô tả / tiện nghi</label>
+                        <textarea className="ab-textarea" name="description" placeholder="VD: Phòng có điều hòa, tủ đồ..." value={form.description} onChange={handleChange} />
+                    </div>
+                </div>
+                {err && <div style={{ color: "#dc2626", fontSize: 13, marginTop: 10 }}>⚠️ {err}</div>}
+                <div className="ab-modal-actions">
+                    <button className="ab-btn-cancel" onClick={onClose}>Hủy</button>
+                    <button className="ab-btn-confirm" onClick={handleSubmit} disabled={loading}>
+                        {loading ? "Đang lưu..." : "Cập nhật phòng"}
                     </button>
                 </div>
             </div>
@@ -285,7 +372,7 @@ export default function AdminBuildingsPage() {
     const [buildings, setBuildings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState(null);
-    const [modal, setModal] = useState(null); // { type:"building"|"building-edit"|"room", data, onRoomSuccess }
+    const [modal, setModal] = useState(null); // { type:"building"|"building-edit"|"room"|"room-edit", data, onRoomSuccess }
 
     const showAlert = useCallback((type, msg) => {
         setAlert({ type, msg });
@@ -364,6 +451,7 @@ export default function AdminBuildingsPage() {
                             onEdit={(building) => setModal({ type: "building-edit", data: building })}
                             onDelete={handleDelete}
                             onAddRoom={(building, refresh) => setModal({ type: "room", data: building, onRoomSuccess: refresh })}
+                            onEditRoom={(room, refresh) => setModal({ type: "room-edit", data: room, onRoomSuccess: refresh })}
                             showAlert={showAlert}
                         />
                     ))}
@@ -392,6 +480,17 @@ export default function AdminBuildingsPage() {
                     onSuccess={() => {
                         setModal(null);
                         showAlert("success", "Tạo phòng thành công!");
+                        if (modal.onRoomSuccess) modal.onRoomSuccess();
+                    }}
+                />
+            )}
+            {modal?.type === "room-edit" && (
+                <EditRoomModal
+                    room={modal.data}
+                    onClose={() => setModal(null)}
+                    onSuccess={() => {
+                        setModal(null);
+                        showAlert("success", `Cập nhật phòng ${modal.data.roomNumber} thành công!`);
                         if (modal.onRoomSuccess) modal.onRoomSuccess();
                     }}
                 />
