@@ -7,7 +7,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.GMAIL_PASS,
     },
 });
-
 /**
  * Gửi mã reset password về email người dùng
  * @param {string} toEmail - Email nhận

@@ -1,11 +1,9 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap");
-
 /* ── Page ── */
 .ar-page {
     min-height: 100vh;
     background: #f8f9fb;
     color: #1a1a1a;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--font-body);
     padding: 32px;
 }
 
@@ -17,10 +15,11 @@
 }
 
 .ar-title {
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 800;
     color: #1a1a1a;
     margin-bottom: 4px;
+    font-family: var(--font-heading);
 }
 
 .ar-subtitle {
@@ -75,7 +74,7 @@
     border: none;
     border-radius: 10px;
     font-size: 14px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-family: var(--font-body);
     cursor: pointer;
     transition: all .2s;
     background: none;

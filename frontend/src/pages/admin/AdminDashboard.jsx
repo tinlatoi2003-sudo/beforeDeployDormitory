@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import "../student/StudentDashboard.css"; // reuse same CSS variables
@@ -324,6 +324,7 @@ function BBuildingCard({ building, onEdit, onDelete, onAddRoom, showAlert }) {
     const [rooms, setRooms] = useState([]);
     const [loadingR, setLoadingR] = useState(false);
     const [loaded, setLoaded] = useState(false);
+    const [editRoom, setEditRoom] = useState(null);
 
     const loadRooms = useCallback(async () => {
         if (loaded) return;
@@ -393,14 +394,22 @@ function BBuildingCard({ building, onEdit, onDelete, onAddRoom, showAlert }) {
                                         <div style={{ fontSize: 11, color: "#999", marginBottom: 6 }}>{room.currentOccupancy}/{room.maxOccupancy} người</div>
                                         <div className="ab-room-price">{B_fmtNum(room.pricePerTerm)}đ/kỳ</div>
                                         <div className="ab-room-actions">
+                                            <button className="ab-btn-room-edit" onClick={() => setEditRoom(room)}>✏️ Sửa</button>
                                             <button className="ab-btn-room-del" onClick={() => handleDeleteRoom(room)}>🗑️ Xóa</button>
                                         </div>
                                     </div>
                                 );
-                            })}
+            })}
                         </div>
                     )}
                 </div>
+            )}
+            {editRoom && (
+                <BRoomEditModal
+                    room={editRoom}
+                    onClose={() => setEditRoom(null)}
+                    onSuccess={() => { setEditRoom(null); showAlert("success", `Đã cập nhật phòng ${editRoom.roomNumber}!`); refreshRooms(); }}
+                />
             )}
         </div>
     );
@@ -540,6 +549,61 @@ function BRoomModal({ building, onClose, onSuccess }) {
                 <div className="ab-modal-actions">
                     <button className="ab-btn-cancel" onClick={onClose}>Hủy</button>
                     <button className="ab-btn-confirm" onClick={handleSubmit} disabled={loading}>{loading ? "Đang tạo..." : "Tạo phòng"}</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function BRoomEditModal({ room, onClose, onSuccess }) {
+    const [form, setForm] = useState({
+        roomNumber: room.roomNumber || "",
+        floor: room.floor || "",
+        type: room.type || "standard",
+        maxOccupancy: room.maxOccupancy || 4,
+        pricePerTerm: room.pricePerTerm || "",
+        status: room.status || "available",
+        description: room.description || "",
+    });
+    const [loading, setLoading] = useState(false);
+    const [err, setErr] = useState("");
+    const hc = (e) => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
+    const handleSubmit = async () => {
+        if (!form.roomNumber || !form.floor || !form.pricePerTerm) { setErr("Vui lòng nhập đầy đủ: số phòng, tầng, giá/kỳ"); return; }
+        setLoading(true); setErr("");
+        try { await api.put(`/rooms/${room._id}`, form); onSuccess(); }
+        catch (e) { setErr(e.response?.data?.message || "Cập nhật phòng thất bại"); }
+        setLoading(false);
+    };
+    return (
+        <div className="ab-overlay" onClick={onClose}>
+            <div className="ab-modal" onClick={e => e.stopPropagation()}>
+                <div className="ab-modal-title">✏️ Sửa phòng — {room.roomNumber}</div>
+                <div className="ab-modal-grid">
+                    <div className="ab-field"><label className="ab-label">Số phòng *</label><input className="ab-input" name="roomNumber" placeholder="VD: 101" value={form.roomNumber} onChange={hc} /></div>
+                    <div className="ab-field"><label className="ab-label">Tầng *</label><input className="ab-input" name="floor" type="number" min="1" placeholder="VD: 1" value={form.floor} onChange={hc} /></div>
+                    <div className="ab-field"><label className="ab-label">Loại phòng</label>
+                        <select className="ab-select" name="type" value={form.type} onChange={hc}>
+                            <option value="standard">Tiêu chuẩn</option>
+                            <option value="vip">VIP</option>
+                            <option value="premium">Premium</option>
+                        </select>
+                    </div>
+                    <div className="ab-field"><label className="ab-label">Sức chứa tối đa</label><input className="ab-input" name="maxOccupancy" type="number" min="1" value={form.maxOccupancy} onChange={hc} /></div>
+                    <div className="ab-field"><label className="ab-label">Giá / kỳ (đồng) *</label><input className="ab-input" name="pricePerTerm" type="number" min="0" placeholder="VD: 1500000" value={form.pricePerTerm} onChange={hc} /></div>
+                    <div className="ab-field"><label className="ab-label">Trạng thái</label>
+                        <select className="ab-select" name="status" value={form.status} onChange={hc}>
+                            <option value="available">Còn chỗ</option>
+                            <option value="full">Hết chỗ</option>
+                            <option value="maintenance">Bảo trì</option>
+                        </select>
+                    </div>
+                    <div className="ab-field full"><label className="ab-label">Mô tả / tiện nghi</label><textarea className="ab-textarea" name="description" placeholder="VD: Phòng có điều hòa, tủ đồ..." value={form.description} onChange={hc} /></div>
+                </div>
+                {err && <div style={{ color: "#dc2626", fontSize: 13, marginTop: 10 }}>⚠️ {err}</div>}
+                <div className="ab-modal-actions">
+                    <button className="ab-btn-cancel" onClick={onClose}>Hủy</button>
+                    <button className="ab-btn-confirm" onClick={handleSubmit} disabled={loading}>{loading ? "Đang lưu..." : "Cập nhật phòng"}</button>
                 </div>
             </div>
         </div>
